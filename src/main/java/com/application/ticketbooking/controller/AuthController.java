@@ -1,8 +1,9 @@
 package com.application.ticketbooking.controller;
 
+import com.application.ticketbooking.controller.api.AuthApi;
 import com.application.ticketbooking.dto.AuthRequest;
 import com.application.ticketbooking.dto.AuthResponse;
-import com.application.ticketbooking.dto.UserResponse;
+import com.application.ticketbooking.dto.RegisterResponse;
 import com.application.ticketbooking.entity.User;
 import com.application.ticketbooking.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -12,10 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Контроллер для обработки запросов, связанных с аутентификацией и регистрацией пользователей.
@@ -23,7 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthApi {
 
     private final AuthService authService;
 
@@ -31,12 +28,12 @@ public class AuthController {
      * Регистрирует нового пользователя.
      *
      * @param user объект пользователя, содержащий регистрационные данные.
-     * @return {@link ResponseEntity} с {@link UserResponse}, содержащим информацию о зарегистрированном пользователе.
+     * @return {@link ResponseEntity} с {@link RegisterResponse}, содержащим информацию о зарегистрированном пользователе.
      */
     @PostMapping("/signup")
-    public ResponseEntity<UserResponse> registerUser(@RequestBody User user) {
-        UserResponse userResponse = authService.registerUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
+    public ResponseEntity<RegisterResponse> registerUser(@RequestBody User user) {
+        RegisterResponse registerResponse = authService.registerUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(registerResponse);
     }
 
     /**
@@ -51,16 +48,4 @@ public class AuthController {
         return ResponseEntity.ok(authResponse);
     }
 
-//    /**
-//     * Обрабатывает ошибки, связанные с выполнением запросов.
-//     *
-//     * @param exception {@link RuntimeException}.
-//     * @return {@link ResponseEntity} с сообщением об ошибке и HttpStatus.BAD_REQUEST.
-//     */
-//    @ExceptionHandler(RuntimeException.class)
-//    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException exception) {
-//        Map<String, String> errorResponse = new HashMap<>();
-//        errorResponse.put("exception", exception.getMessage());
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-//    }
 }

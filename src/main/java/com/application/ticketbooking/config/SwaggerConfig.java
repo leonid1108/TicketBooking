@@ -21,7 +21,6 @@ import io.swagger.v3.oas.models.info.Info;
         bearerFormat = "JWT",
         name = "BearerAuth")
 public class SwaggerConfig {
-
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()

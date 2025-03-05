@@ -5,9 +5,11 @@ import com.application.ticketbooking.dto.BookingResponse;
 import com.application.ticketbooking.entity.Booking;
 import com.application.ticketbooking.entity.Event;
 import com.application.ticketbooking.entity.User;
+import com.application.ticketbooking.exception.BadRequestException;
 import com.application.ticketbooking.repository.BookingRepository;
 import com.application.ticketbooking.repository.EventRepository;
 import com.application.ticketbooking.service.BookingService;
+import com.application.ticketbooking.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import java.time.LocalDateTime;
 
+/**
+ * Реализация сервиса бронирования билетов.
+ * <p>
+ * Обеспечивает бронирование мест на мероприятия и получение списка бронирований.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
@@ -28,16 +36,27 @@ public class BookingServiceImpl implements BookingService {
     private final ModelMapper modelMapper;
     private final NotificationLogServiceImpl notificationLogService;
 
+    /**
+     * Осуществляет бронирование билетов на мероприятие.
+     * <p>
+     * Транзакция используется для обеспечения целостности данных при бронировании мест.
+     * Уровень изоляции {@code Isolation.SERIALIZABLE} предотвращает конкурентные изменения данных,
+     * обеспечивая корректное распределение мест между пользователями.
+     * <p>
+     * @param bookingRequest объект запроса на бронирование с информацией о мероприятии и количестве билетов
+     * @return {@link BookingResponse} с данными о бронировании и подтверждающим сообщением
+     * @throws EntityNotFoundException если мероприятие не найдено
+     * @throws BadRequestException если недостаточно свободных мест
+     */
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public BookingResponse bookingTickets(BookingRequest bookingRequest) {
-
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Event event = eventRepository.findById(bookingRequest.getEventId())
-                .orElseThrow(() -> new RuntimeException("Мероприятие не найдено."));
+                .orElseThrow(() -> new EntityNotFoundException("Мероприятие не найдено."));
 
         if (event.getAvailableSeats() < bookingRequest.getTicketsCount()) {
-            throw new RuntimeException("Недостаточно мест на мероприятии");
+            throw new BadRequestException("Недостаточно мест на мероприятии");
         }
 
         Booking booking = new Booking();
@@ -60,11 +79,17 @@ public class BookingServiceImpl implements BookingService {
         return bookingResponse;
     }
 
+    /**
+     * Получает список всех бронирований с пагинацией.
+     *
+     * @param page номер страницы (начиная с 0)
+     * @param size количество записей на странице
+     * @return страничный список бронирований {@link Page}, содержащий объекты {@link Booking}
+     */
     @Override
     public Page<Booking> getAllBookings(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return bookingRepository.findAll(pageable);
     }
-
 
 }

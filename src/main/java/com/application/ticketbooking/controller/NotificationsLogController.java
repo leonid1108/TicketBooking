@@ -1,5 +1,6 @@
 package com.application.ticketbooking.controller;
 
+import com.application.ticketbooking.controller.api.NotificationsLogApi;
 import com.application.ticketbooking.entity.NotificationLog;
 import com.application.ticketbooking.service.NotificationLogService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/notifications")
 @RequiredArgsConstructor
-public class NotificationsLogController {
+public class NotificationsLogController implements NotificationsLogApi {
 
     private final NotificationLogService notificationLogService;
 

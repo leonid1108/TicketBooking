@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponse {
+public class RegisterResponse {
     private Long id;
     private String username;
     private String role;

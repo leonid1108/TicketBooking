@@ -9,11 +9,11 @@ spring:
         password: ${DB_PASSWORD}
         driver-class-name: org.postgresql.Driver
     jpa:
-        show-sql: true
+        show-sql: false
         properties:
             hibernate:
                 ddl-auto: none
-                format_sql: true
+                format_sql: false
     flyway:
         enabled: true
         url: ${FLYWAY_URL}
@@ -22,10 +22,7 @@ spring:
         cleanDisabled: false
         schemas: ticket_booking
 
-    security:
-        enabled: false
-
 jwt:
     secret: ${JWT_SECRET}
-    lifetime: 60m
+    lifetime: 360m
 

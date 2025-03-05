@@ -1,10 +1,9 @@
 package com.application.ticketbooking.controller;
 
+import com.application.ticketbooking.controller.api.EventApi;
 import com.application.ticketbooking.dto.EventResponse;
 import com.application.ticketbooking.entity.Event;
 import com.application.ticketbooking.service.EventService;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,11 +21,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/events")
 @RequiredArgsConstructor
-@ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Мероприятие найдено."),
-        @ApiResponse(responseCode = "400", description = "Мероприятие не найдено.")
-})
-public class EventController {
+public class EventController implements EventApi {
 
     private final EventService eventService;
 
@@ -62,8 +57,6 @@ public class EventController {
      * @param id идентификатор мероприятия {@link Event}
      * @return {@link ResponseEntity} с {@link Event}
      */
-    @ApiResponse(responseCode = "200", description = "Мероприятие найдено")
-    @ApiResponse(responseCode = "404", description = "Мероприятие не найдено.")
     @GetMapping("/{id}")
     public ResponseEntity<Event> getEventById(@PathVariable("id") Long id) {
         Event event = eventService.getEventById(id);
@@ -82,7 +75,7 @@ public class EventController {
         EventResponse eventResponse = eventService.createEvent(event);
         eventResponse.setMessage("Мероприятие успешно создано.");
 
-        return ResponseEntity.ok().body(eventResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventResponse);
     }
 
     /**
@@ -96,7 +89,6 @@ public class EventController {
     @CacheEvict(value = "events", allEntries = true)
     public ResponseEntity<EventResponse> updateEvent(@PathVariable("id") Long id, @RequestBody Event event) {
         EventResponse eventResponse = eventService.updateEvent(event, id);
-        eventResponse.setMessage("Мероприятие успешно обновлено.");
         return ResponseEntity.ok().body(eventResponse);
     }
 
@@ -110,7 +102,6 @@ public class EventController {
     @CacheEvict(value = "events", allEntries = true)
     public ResponseEntity<Map<String,Object>> deleteEvent(@PathVariable("id") Long id) {
         boolean isDeleted = eventService.deleteEvent(id);
-
         if (isDeleted) {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Мероприятие успешно удалено.");
@@ -118,19 +109,6 @@ public class EventController {
         } else {
             return ResponseEntity.noContent().build();
         }
-    }
-
-    /**
-     * Обрабатывает ошибки, связанные с выполнением запросов.
-     *
-     * @param exception {@link RuntimeException}.
-     * @return {@link ResponseEntity} с сообщением об ошибке и HttpStatus.NOT_FOUND.
-     */
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException exception) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("exception", exception.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
 }

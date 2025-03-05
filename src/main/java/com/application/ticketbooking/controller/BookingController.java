@@ -1,5 +1,7 @@
 package com.application.ticketbooking.controller;
 
+import com.application.ticketbooking.controller.api.BookingApi;
+import com.application.ticketbooking.dto.BookingPageResponse;
 import com.application.ticketbooking.dto.BookingRequest;
 import com.application.ticketbooking.dto.BookingResponse;
 import com.application.ticketbooking.entity.Booking;
@@ -21,7 +23,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/bookings")
-public class BookingController {
+public class BookingController implements BookingApi {
 
     private final BookingService bookingService;
 
@@ -51,15 +53,13 @@ public class BookingController {
 
         Page<Booking> bookingsPage = bookingService.getAllBookings(page, size);
 
-        List<Map<String, Object>> bookings = bookingsPage.getContent().stream()
-                .map(booking -> {
-                    Map<String, Object> bookingMap = new LinkedHashMap<>();
-                    bookingMap.put("id", booking.getId());
-                    bookingMap.put("eventId", booking.getEvent().getId());
-                    bookingMap.put("bookingDate", booking.getBookingDate());
-                    bookingMap.put("ticketsCount", booking.getTicketsCount());
-                    return bookingMap;
-                })
+        List<BookingPageResponse> bookings = bookingsPage.getContent().stream()
+                .map(booking -> new BookingPageResponse(
+                        booking.getId(),
+                        booking.getEvent().getId(),
+                        booking.getBookingDate(),
+                        booking.getTicketsCount()
+                ))
                 .collect(Collectors.toList());
 
         Map<String, Object> response = new LinkedHashMap<>();
@@ -70,16 +70,5 @@ public class BookingController {
 
         return ResponseEntity.ok().body(response);
     }
-
-//    /**
-//     * Обрабатывает ошибки, связанные с выполнением запросов.
-//     *
-//     * @param exception {@link RuntimeException}.
-//     * @return {@link ResponseEntity} с сообщением об ошибке и HttpStatus.BAD_REQUEST.
-//     */
-//    @ExceptionHandler(RuntimeException.class)
-//    public ResponseEntity<String> handleRuntimeException(RuntimeException exception) {
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
-//    }
 
 }
