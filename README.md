@@ -62,7 +62,7 @@ git clone https://github.com/your-repo/ticket-booking-service.git
 Файл application-local.yml не хранится в репозитории по соображениям безопасности.
 Его нужно создать вручную в директории src/main/resources/
 
-Пример 
+Пример application-local.yml:
 ```
 spring:
     datasource:
